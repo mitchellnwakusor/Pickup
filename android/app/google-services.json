@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1024603223612",
+    "project_id": "pickupdriver-efa56",
+    "storage_bucket": "pickupdriver-efa56.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1024603223612:android:46da87146b312ab754f539",
+        "android_client_info": {
+          "package_name": "com.cube.pickup_driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1024603223612-0fds9rbles2fb06hr4m9k07o64m3pmnc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cube.pickup_driver",
+            "certificate_hash": "329e99895fb5eff3d632e8d8433624910b74cdef"
+          }
+        },
+        {
+          "client_id": "1024603223612-us0nsfk6aptc473qusfmjmosljn06hhk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCQrhQ4U94qyZx9IdqTv8dpUSeXFAjpGs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1024603223612-us0nsfk6aptc473qusfmjmosljn06hhk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
