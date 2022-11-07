@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Providers extends ChangeNotifier {
@@ -48,4 +49,5 @@ class Providers extends ChangeNotifier {
     token = value;
     notifyListeners();
   }
+
 }
