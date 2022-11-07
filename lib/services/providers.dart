@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../maps/models/user_info.dart';
 
 class Providers extends ChangeNotifier {
   bool loggedIn = false;
@@ -46,6 +49,16 @@ class Providers extends ChangeNotifier {
   }
   void setTokenValue(int? value) {
     token = value;
+    notifyListeners();
+  }
+
+}
+
+class UserInfoProvider with ChangeNotifier{
+  UserInformation? userInformation;
+
+  void updateUserInfoObject(UserInformation? newUserInfo){
+    userInformation = newUserInfo;
     notifyListeners();
   }
 }

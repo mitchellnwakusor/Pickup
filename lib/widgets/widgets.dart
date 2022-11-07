@@ -697,7 +697,7 @@ class VerifyOTPButton extends StatefulWidget {
 
 class _VerifyOTPButtonState extends State<VerifyOTPButton> {
   FirebaseAuthentication firebaseAuthentication = FirebaseAuthentication();
-  FirebaseDatabase firebaseDatabase = FirebaseDatabase();
+  FirebaseRealtimeDatabase firebaseDatabase = FirebaseRealtimeDatabase();
   @override
   Widget build(BuildContext context) {
     String firstName = Provider.of<Providers>(context).firstName;
@@ -710,9 +710,8 @@ class _VerifyOTPButtonState extends State<VerifyOTPButton> {
         const LoadingWidget().showLoadingWidget(context);
         bool successful = await firebaseAuthentication.verifyMobileNo(Provider.of<Providers>(context,listen: false).verificationCode, Provider.of<Providers>(context,listen: false).otpCode, context);
         if(successful){
-          Navigator.pop(context);
           user = firebaseAuthentication.auth.currentUser!;
-          await firebaseDatabase.storeUserInfo(context, firstName, lastName, email, mobileNo, user);
+          await firebaseDatabase.storePersonalInfo(context, firstName, lastName, email, mobileNo, user);
         }
         },
       backgroundColor: Colors.white,
@@ -829,6 +828,7 @@ class _LoginFormState extends State<LoginForm> {
             if(formKey.currentState!.validate()){
               const LoadingWidget().showLoadingWidget(context);
               await firebaseAuthentication.signInEmailPassword(context, emailAddress.text, password.text);
+
             }
           }, child: const Text('Sign in')),
           const SizedBox(height: 16),
@@ -848,6 +848,505 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
+
+class PaymentCardForm extends StatefulWidget {
+  const PaymentCardForm({Key? key}) : super(key: key);
+
+  @override
+  State<PaymentCardForm> createState() => _PaymentCardFormState();
+}
+
+class _PaymentCardFormState extends State<PaymentCardForm> {
+  final GlobalKey<FormState> _key = GlobalKey<FormState>();
+  FirebaseAuthentication authentication = FirebaseAuthentication();
+  FirebaseRealtimeDatabase database = FirebaseRealtimeDatabase();
+  final TextEditingController cardNumber = TextEditingController();
+  final TextEditingController cardName = TextEditingController();
+  final TextEditingController expDate = TextEditingController();
+  final TextEditingController cvv = TextEditingController();
+  String? cardIcon = 'lib/assets/icons/credit-card.png';
+  String? date;
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return SafeArea(child: Column(
+      children: [
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          elevation: 3,
+          shadowColor: Colors.grey[300],
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Form(
+              key: _key,
+              // autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  const SizedBox(height: 16.0,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          width: 240,
+                          child: TextFormField(
+                            controller: cardNumber,
+                            onChanged: (String value){
+                              setState((){
+                                cardIcon = 'lib/assets/icons/credit-card.png';
+                              });
+                              if(value.length>1 && value[0] == '5' && value.length <=16){
+                                setState((){
+                                  cardIcon = 'lib/assets/icons/mc_symbol.png';
+                                });
+                              }
+                              else if(value.length>1 && value[0] == '4' && value.length <=16){
+                                setState((){
+                                  cardIcon = 'lib/assets/icons/Visa_Brandmark_Blue_RGB_2021.png';
+                                });
+                              }
+                              else if(value.length>1 && value[0] == '5' && value.length >16){
+                                setState((){
+                                  cardIcon = 'lib/assets/icons/verve.png';
+                                });
+                              }
+                            },
+                            validator: (value){
+                              if (value == null || value.trim().isEmpty) {
+                                return 'This field is required.';
+                              }
+                              if (value.length < 16) {
+                                return 'Card number is less than 16 digits';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(
+                              fontSize: 24.0,
+                            ),
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              label: Text('Card number'),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintText: 'XXXX XXXX XXXX XXXX',
+                              border: InputBorder.none,
+                            ),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(19),
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 48,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8.0,8.0,8.0,0),
+                          child: Image.asset(cardIcon!),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          width: 120.0,
+                          child: TextFormField(
+                            onChanged: (String value){
+                              if(value.length==2 && !value.contains('/')){
+                                date = expDate.text;
+                                TextSelection selection = expDate.selection;
+                                String replacement = '/';
+                                String newDate = date! + replacement;
+                                // date.replaceRange(selection.start, selection.end, replacement);
+                                final length = replacement.length;
+                                expDate.value = TextEditingValue(
+                                    text: newDate,
+                                    selection: TextSelection.collapsed(offset: selection.baseOffset + length)
+                                );
+                                // expDate.selection = selection.copyWith(
+                                //   baseOffset: selection.start + length,
+                                //   extentOffset: selection.start + length,
+                                // );
+                                if(value=='/'){
+                                  value='';
+                                }
+                              }
+
+                            },
+                            controller: expDate,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            validator: (value){
+                              if (value == null ||
+                                  value.trim().isEmpty) {
+                                return 'This field is required.';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.datetime,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                            ),
+                            decoration: const InputDecoration(
+                              label: Text('MONTH/YEAR'),
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: 'XX/XX',
+                              border: InputBorder.none,
+                            ),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(5),
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9 /]')),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: SizedBox(
+                          width: 60.0,
+                          child: TextFormField(
+                            controller: cvv,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            validator: (value){
+                              if (value == null ||
+                                  value.trim().isEmpty) {
+                                return 'This field is required.';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                            ),
+                            decoration:
+                            const InputDecoration(
+                              label: Text('CVV'),
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: 'XXX',
+                              border: InputBorder.none,
+                            ),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(3),
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0,),
+                  TextFormField(
+                    keyboardType: TextInputType.name,
+                    controller: cardName,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (value){
+                      if (value == null ||
+                          value.trim().isEmpty) {
+                        return 'This field is required.';
+                      }
+                      return null;
+                    },
+                    style: const TextStyle(
+                      fontSize: 16.0,
+                    ),
+                    decoration: const InputDecoration(
+                      label: Text('NAME ON CARD'),
+                      contentPadding: EdgeInsets.all(8.0),
+                      hintText: 'CARD OWNER',
+                      border: InputBorder.none,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-z A-Z]')),
+                      // FilteringTextInputFormatter.allow(RegExp(r'[ ]'))
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Align(alignment: Alignment.centerRight,child: FloatingActionButton(onPressed: () async{
+            if(_key.currentState!.validate()) {
+              const LoadingWidget().showLoadingWidget(context);
+              User? user = authentication.auth.currentUser;
+              await database.storePaymentInfo(context, cardName.text, cardNumber.text, expDate.text, cvv.text, user!);
+            }
+          },child: const Icon(Icons.arrow_forward_rounded),)),
+        )
+      ],
+    ));
+    // return ListView(
+    //   children: [
+    //     Column(
+    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         const SizedBox(height: 32.0),
+    //         const Padding(
+    //           padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
+    //           child: Text(
+    //             'Add a Payment Card',
+    //             style: TextStyle(
+    //                 color: Colors.blue,
+    //                 fontSize: 24.0,
+    //                 fontWeight: FontWeight.w600),
+    //           ),
+    //         ),
+    //         const SizedBox(height: 16.0,),
+    //         Card(
+    //           margin: EdgeInsets.all(16.0),
+    //           elevation: 3,
+    //           shadowColor: Colors.grey[300],
+    //           shape: RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.circular(10)
+    //           ),
+    //           child: Padding(
+    //             padding: const EdgeInsets.all(8.0),
+    //             child: Form(
+    //               key: formKey,
+    //               // autovalidateMode: AutovalidateMode.onUserInteraction,
+    //               child: Column(
+    //                 children: [
+    //                   const SizedBox(height: 16.0,),
+    //                   Row(
+    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                     children: [
+    //                       Expanded(
+    //                         child: SizedBox(
+    //                           width: 240,
+    //                           child: TextFormField(
+    //                             controller: cardNumber,
+    //                             onChanged: (String value){
+    //                               setState((){
+    //                                 cardIcon = 'lib/assets/images/credit-card.png';
+    //                               });
+    //                               if(value.length>1 && value[0] == '5' && value.length <=16){
+    //                                 setState((){
+    //                                   cardIcon = 'lib/assets/images/mc_symbol.png';
+    //                                 });
+    //                               }
+    //                               else if(value.length>1 && value[0] == '4' && value.length <=16){
+    //                                 setState((){
+    //                                   cardIcon = 'lib/assets/images/Visa_Brandmark_Blue_RGB_2021.png';
+    //                                 });
+    //                               }
+    //                               else if(value.length>1 && value[0] == '5' && value.length >16){
+    //                                 setState((){
+    //                                   cardIcon = 'lib/assets/images/verve.png';
+    //                                 });
+    //                               }
+    //                             },
+    //                             validator: (value){
+    //                               if (value == null || value.trim().isEmpty) {
+    //                                 return 'This field is required.';
+    //                               }
+    //                               if (value.length < 16) {
+    //                                 return 'Card number is less than 16 digits';
+    //                               }
+    //                               return null;
+    //                             },
+    //                             autovalidateMode: AutovalidateMode.onUserInteraction,
+    //                             keyboardType: TextInputType.number,
+    //                             style: const TextStyle(
+    //                               fontSize: 24.0,
+    //                             ),
+    //                             decoration: const InputDecoration(
+    //                               contentPadding: EdgeInsets.all(8.0),
+    //                               label: Text('Card number'),
+    //                               floatingLabelBehavior: FloatingLabelBehavior.always,
+    //                               hintText: 'XXXX XXXX XXXX XXXX',
+    //                               border: InputBorder.none,
+    //                             ),
+    //                             inputFormatters: [
+    //                               LengthLimitingTextInputFormatter(19),
+    //                               FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+    //                             ],
+    //                           ),
+    //                         ),
+    //                       ),
+    //                       SizedBox(
+    //                         width: 48,
+    //                         child: Padding(
+    //                           padding: const EdgeInsets.fromLTRB(8.0,8.0,8.0,0),
+    //                           child: Image.asset(cardIcon),
+    //                         ),
+    //                       )
+    //                     ],
+    //                   ),
+    //                   const SizedBox(height: 16.0),
+    //                   Row(
+    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                     children: [
+    //                       Expanded(
+    //                         child: SizedBox(
+    //                           width: 120.0,
+    //                           child: TextFormField(
+    //                             onChanged: (String value){
+    //                               if(value.length==2 && !value.contains('/')){
+    //                                 date = expDate.text;
+    //                                 TextSelection selection = expDate.selection;
+    //                                 String replacement = '/';
+    //                                 String newDate = date + replacement;
+    //                                 // date.replaceRange(selection.start, selection.end, replacement);
+    //                                 final length = replacement.length;
+    //                                 expDate.value = TextEditingValue(
+    //                                     text: newDate,
+    //                                     selection: TextSelection.collapsed(offset: selection.baseOffset + length)
+    //                                 );
+    //                                 // expDate.selection = selection.copyWith(
+    //                                 //   baseOffset: selection.start + length,
+    //                                 //   extentOffset: selection.start + length,
+    //                                 // );
+    //                                 if(value=='/'){
+    //                                   value='';
+    //                                 }
+    //                               }
+    //
+    //                             },
+    //                             controller: expDate,
+    //                             autovalidateMode: AutovalidateMode.onUserInteraction,
+    //                             validator: (value){
+    //                               if (value == null ||
+    //                                   value.trim().isEmpty) {
+    //                                 return 'This field is required.';
+    //                               }
+    //                               return null;
+    //                             },
+    //                             keyboardType: TextInputType.datetime,
+    //                             style: const TextStyle(
+    //                               fontSize: 16.0,
+    //                             ),
+    //                             decoration: const InputDecoration(
+    //                               label: Text('MONTH/YEAR'),
+    //                               contentPadding: EdgeInsets.all(8.0),
+    //                               hintText: 'XX/XX',
+    //                               border: InputBorder.none,
+    //                             ),
+    //                             inputFormatters: [
+    //                               LengthLimitingTextInputFormatter(5),
+    //                               FilteringTextInputFormatter.allow(RegExp(r'[0-9 /]')),
+    //                             ],
+    //                           ),
+    //                         ),
+    //                       ),
+    //                       Expanded(
+    //                         child: SizedBox(
+    //                           width: 60.0,
+    //                           child: TextFormField(
+    //                             controller: cvv,
+    //                             autovalidateMode: AutovalidateMode.onUserInteraction,
+    //                             validator: (value){
+    //                               if (value == null ||
+    //                                   value.trim().isEmpty) {
+    //                                 return 'This field is required.';
+    //                               }
+    //                               return null;
+    //                             },
+    //                             keyboardType: TextInputType.number,
+    //                             style: const TextStyle(
+    //                               fontSize: 16.0,
+    //                             ),
+    //                             decoration:
+    //                             const InputDecoration(
+    //                               label: Text('CVV'),
+    //                               contentPadding: EdgeInsets.all(8.0),
+    //                               hintText: 'XXX',
+    //                               border: InputBorder.none,
+    //                             ),
+    //                             inputFormatters: [
+    //                               LengthLimitingTextInputFormatter(3),
+    //                               FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+    //                             ],
+    //                           ),
+    //                         ),
+    //                       ),
+    //                     ],
+    //                   ),
+    //                   const SizedBox(height: 16.0,),
+    //                   TextFormField(
+    //                     keyboardType: TextInputType.name,
+    //                     controller: cardName,
+    //                     autovalidateMode: AutovalidateMode.onUserInteraction,
+    //                     validator: (value){
+    //                       if (value == null ||
+    //                           value.trim().isEmpty) {
+    //                         return 'This field is required.';
+    //                       }
+    //                       return null;
+    //                     },
+    //                     style: const TextStyle(
+    //                       fontSize: 16.0,
+    //                     ),
+    //                     decoration: const InputDecoration(
+    //                       label: Text('NAME ON CARD'),
+    //                       contentPadding: EdgeInsets.all(8.0),
+    //                       hintText: 'CARD OWNER',
+    //                       border: InputBorder.none,
+    //                     ),
+    //                     inputFormatters: [
+    //                       FilteringTextInputFormatter.allow(RegExp(r'[a-z A-Z]')),
+    //                       // FilteringTextInputFormatter.allow(RegExp(r'[ ]'))
+    //                     ],
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+    //           ),
+    //         ),
+    //         Align(
+    //           alignment: Alignment.centerLeft,
+    //           child: Padding(
+    //             padding: const EdgeInsets.all(8.0),
+    //             child: TextButton(onPressed: (){Navigator.pushReplacementNamed(context, '/homeScreen');}, child: const Text('SKIP',style: TextStyle(letterSpacing: 1),),style: ButtonStyle(
+    //               foregroundColor: MaterialStateProperty.all(Colors.grey),
+    //             ),),
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //     // const SizedBox(height: 72.0),
+    //     Padding(
+    //       padding: const EdgeInsets.all(16.0),
+    //       child: Align(
+    //           alignment: Alignment.bottomRight,
+    //           child: FloatingActionButton(backgroundColor: Colors.blueGrey,onPressed: () async{
+    //             if(formKey.currentState!.validate()){
+    //               setState((){
+    //                 cardDate = expDate.text.replaceAll('/', '');
+    //               });
+    //               print('${cardNumber.text}  $cardDate ${cvv.text}');
+    //               try {
+    //                 await database.updateUserData(
+    //                     cardName.text, cardNumber.text, expDate.text, cvv.text,
+    //                     authentication.user);
+    //                 Navigator.pushReplacementNamed(context, '/homeScreen');
+    //               }
+    //               on FirebaseException catch(e){
+    //                 setState((){
+    //                   errorMessage = e.message!;
+    //                 });
+    //                 dialog.showCustomErrorDialog(context, 'Unable to create account', errorMessage);
+    //               }
+    //             }
+    //             // Navigator.pushNamed(context, '/profileScreen');
+    //           }, child: const Icon(Icons.arrow_forward,color: Colors.white,size: 32.0,))),
+    //     )
+    //   ],
+    //
+    // );
+  }
+}
+
 
 
 
