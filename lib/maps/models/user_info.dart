@@ -66,18 +66,21 @@ class PersonalInfo {
     this.firstName,
     this.lastName,
     this.mobileNumber,
+    this.userType;
   });
 
   String? emailAddress;
   String? firstName;
   String? lastName;
   String? mobileNumber;
+  String? userType;
 
   factory PersonalInfo.fromJson(Map<String, dynamic> json) => PersonalInfo(
     emailAddress: json["email address"],
     firstName: json["first name"],
     lastName: json["last name"],
     mobileNumber: json["mobile number"],
+    userType: json["user type"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -85,5 +88,6 @@ class PersonalInfo {
     "first name": firstName,
     "last name": lastName,
     "mobile number": mobileNumber,
+    "user type": userType,
   };
 }

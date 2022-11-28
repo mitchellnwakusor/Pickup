@@ -102,7 +102,7 @@ class FirebaseAuthentication{
       Navigator.pop(context);
       await auth.signInWithEmailAndPassword(email: email, password: password);
       if(auth.currentUser!=null){
-        await database.fetchUserInfo(context,'/home');
+        await database.fetchUserInfoLogin(context,'/home');
       }
     } on FirebaseAuthException catch (e) {
       showDialog(context: context, builder: (BuildContext context){
@@ -125,7 +125,7 @@ class FirebaseRealtimeDatabase{
     Map? userInfoMap;
     try {
       database
-          .ref('/pUser/${user!.uid}')
+          .ref('/dUser/${user!.uid}')
           .onValue
           .listen((event) {
         // database.ref('/pUser/fP0CE5J4ZOTjBsQwcu0aQAuu1iW2').onValue.listen((event) {
@@ -169,6 +169,49 @@ class FirebaseRealtimeDatabase{
         return CustomDialog(titleText: e.code, contentText: e.message.toString());
       });
     }
+  }
+  Future<void>fetchUserInfoLogin(BuildContext context, String? routeName) async{
+    FirebaseAuthentication authentication = FirebaseAuthentication();
+    User? user = authentication.auth.currentUser;
+    UserInformation userInformation;
+    print(user?.uid);
+    Map? userInfoMap;
+    try {
+      database.ref('/dUser/${user!.uid}').onValue.listen((event) {
+        // database.ref('/pUser/fP0CE5J4ZOTjBsQwcu0aQAuu1iW2').onValue.listen((event) {
+        userInfoMap = Map<String,dynamic>.from(event.snapshot.value as Map);
+        print(userInfoMap);
+        Map? personalInfoMap = userInfoMap!['Personal Info'];
+        Map? paymentInfoMap = userInfoMap!['Payment Info'];
+
+        // create userInfo object from map
+        PersonalInfo personalInfo = PersonalInfo(emailAddress: personalInfoMap!['email address'],firstName: personalInfoMap!['first name'],lastName: personalInfoMap!['last name'],mobileNumber: personalInfoMap!['mobile number'],userType: personalInfoMap!['user type']);
+        PaymentInfo paymentInfo = PaymentInfo(cardCvv: paymentInfoMap!['card cvv'],cardEnabled: paymentInfoMap!['card enabled'],cardExpDate: paymentInfoMap!['card expDate'],cardholderName: paymentInfoMap!['cardholder name'],cardNumber: paymentInfoMap!['card number'],);
+
+        userInformation = UserInformation(personalInfo: personalInfo,paymentInfo: paymentInfo);
+        Provider.of<UserInfoProvider>(context,listen: false).updateUserInfoObject(userInformation);
+
+        print(Provider.of<UserInfoProvider>(context,listen: false).userInformation?.personalInfo?.firstName);
+
+        if(userInformation.personalInfo!.userType=='driver'){
+          if(routeName!=null){
+            Navigator.pushReplacementNamed(context, routeName);
+          }
+        }
+        else{
+          authentication.auth.signOut();
+          showDialog(context: context, builder: (BuildContext context){
+            return const CustomDialog(titleText: 'Oops...an error occurred!', contentText:'Please user passenger app, credentials do not match');
+          });
+        }
+
+      });
+    } on FirebaseException catch (e) {
+      showDialog(context: context, builder: (BuildContext context){
+        return CustomDialog(titleText: e.code, contentText: e.message.toString());
+      });
+    }
+
   }
 
   Future<void> storePersonalInfo(BuildContext context,String firstName, String lastName, String email, String mobileNumber, User user) async{
