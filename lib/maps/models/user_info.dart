@@ -66,7 +66,7 @@ class PersonalInfo {
     this.firstName,
     this.lastName,
     this.mobileNumber,
-    this.userType;
+    this.userType
   });
 
   String? emailAddress;

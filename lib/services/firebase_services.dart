@@ -246,9 +246,9 @@ class FirebaseRealtimeDatabase{
         }
       });
       Navigator.pop(context);
-      Navigator.pop(context);
+      // Navigator.pop(context);
 
-      await fetchUserInfo(context, '/homeScreen');
+      await fetchUserInfo(context, '/home');
       // Navigator.pop(context);
     }
     on FirebaseException catch(e){
@@ -272,7 +272,7 @@ class FirebaseRealtimeDatabase{
       Navigator.pop(context);
       Navigator.pop(context);
 
-      await fetchUserInfo(context, '/homeScreen');
+      await fetchUserInfo(context, '/home');
       // Navigator.pop(context);
     }
     on FirebaseException catch(e){

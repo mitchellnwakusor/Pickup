@@ -1,42 +1,34 @@
 {
   "project_info": {
-    "project_number": "421280282173",
-    "firebase_url": "https://driva-214f2-default-rtdb.firebaseio.com",
-    "project_id": "driva-214f2",
-    "storage_bucket": "driva-214f2.appspot.com"
+    "project_number": "1006445637423",
+    "firebase_url": "https://pickup-app-b9042-default-rtdb.firebaseio.com",
+    "project_id": "pickup-app-b9042",
+    "storage_bucket": "pickup-app-b9042.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:421280282173:android:3d6aa7e781980235411c54",
+        "mobilesdk_app_id": "1:1006445637423:android:5a7689ff9cd25499d87bda",
         "android_client_info": {
           "package_name": "com.cube.driva"
         }
       },
       "oauth_client": [
         {
-          "client_id": "421280282173-u0tr8jmednj16bgu4hv75q271b5b9ai0.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.cube.driva",
-            "certificate_hash": "2a5b60f12a88be53c5b391ed736577803caada6f"
-          }
-        },
-        {
-          "client_id": "421280282173-81nn70c7c7g297u4isp4qfhf6ar0s7as.apps.googleusercontent.com",
+          "client_id": "1006445637423-82bn4mm1nr2f7ggohbe5f4cn3g0sd1fs.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBEoPvQSq2DYvjv2quyoJxDYhtNmbQ__NU"
+          "current_key": "AIzaSyCkv25fWRr74fL1nvSGpwwMNsVgo-IwWvE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "421280282173-81nn70c7c7g297u4isp4qfhf6ar0s7as.apps.googleusercontent.com",
+              "client_id": "1006445637423-82bn4mm1nr2f7ggohbe5f4cn3g0sd1fs.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -45,35 +37,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:421280282173:android:0a9fbed5d16bbe97411c54",
+        "mobilesdk_app_id": "1:1006445637423:android:c8f666cc6df1cd6fd87bda",
         "android_client_info": {
           "package_name": "com.cube.pickupdriver"
         }
       },
       "oauth_client": [
         {
-          "client_id": "421280282173-id7k1ib71aib0oc9tsfbfk3dcobpe264.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.cube.pickupdriver",
-            "certificate_hash": "2a5b60f12a88be53c5b391ed736577803caada6f"
-          }
-        },
-        {
-          "client_id": "421280282173-81nn70c7c7g297u4isp4qfhf6ar0s7as.apps.googleusercontent.com",
+          "client_id": "1006445637423-82bn4mm1nr2f7ggohbe5f4cn3g0sd1fs.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBEoPvQSq2DYvjv2quyoJxDYhtNmbQ__NU"
+          "current_key": "AIzaSyCkv25fWRr74fL1nvSGpwwMNsVgo-IwWvE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "421280282173-81nn70c7c7g297u4isp4qfhf6ar0s7as.apps.googleusercontent.com",
+              "client_id": "1006445637423-82bn4mm1nr2f7ggohbe5f4cn3g0sd1fs.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
