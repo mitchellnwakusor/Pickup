@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:pickup_driver/global/global.dart';
 import 'package:pickup_driver/widgets/custom_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,7 +29,7 @@ class _HomeIndexState extends State<HomeIndex> {
 
   String userName = "";
   String userEmail = "";
-  Position? userCurrentPosition;
+  Position? driverCurrentPosition;
   var geoLocator = Geolocator();
   LocationPermission? _locationPermission;
   CustomColorTheme? customColorTheme;
@@ -49,15 +52,15 @@ class _HomeIndexState extends State<HomeIndex> {
   locateDriverPosition() async
   {
     Position cPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    userCurrentPosition = cPosition;
+    driverCurrentPosition = cPosition;
 
-    LatLng latLngPosition = LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
+    LatLng latLngPosition = LatLng(driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
 
     CameraPosition cameraPosition = CameraPosition(target: latLngPosition, zoom: 14);
 
     newGoogleMapController!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-    String humanReadableAddress = await AssistantMethod.searchAddressForGeographicCoOrdinates(userCurrentPosition!, context);
+    String humanReadableAddress = await AssistantMethod.searchAddressForGeographicCoOrdinates(driverCurrentPosition!, context);
     print("this is your address = " + humanReadableAddress);
 
     userEmail ="JoneDoe@gmail.com";
@@ -110,7 +113,7 @@ class _HomeIndexState extends State<HomeIndex> {
                 children: [
                   ElevatedButton(
                       onPressed: (){
-
+                        driverIsOnlineNow();
                       },
                     style: ElevatedButton.styleFrom(
                       primary: customColorTheme?.btnColor,
@@ -140,5 +143,28 @@ class _HomeIndexState extends State<HomeIndex> {
         ],
       );
 
+  }
+ //update driver current location in realtime database when driver goes online
+  driverIsOnlineNow() async{
+    Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+    );
+    driverCurrentPosition = pos;
+
+    //set location of all drivers online using driver id
+    Geofire.initialize("activeDrivers");
+    Geofire.setLocation(
+        currentFirebaseUser!.uid,
+        driverCurrentPosition!.latitude,
+        driverCurrentPosition!.longitude
+    );
+
+    DatabaseReference ref = FirebaseDatabase.instance.ref()
+        .child("dUser")
+        .child(currentFirebaseUser!.uid)
+        .child("newRideStatus");
+
+    ref.set("idle"); // searching for ride request
+    ref.onValue.listen((event) { });
   }
 }
