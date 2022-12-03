@@ -14,6 +14,8 @@ import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/services/providers.dart';
 import 'package:provider/provider.dart';
 
+import 'models/user_info.dart';
+
 class PassengerDestination extends StatefulWidget {
   const PassengerDestination({Key? key}) : super(key: key);
 
@@ -93,6 +95,10 @@ class _PassengerDestinationState extends State<PassengerDestination> {
   @override
   Widget build(BuildContext context)
   {
+    UserInformation? currentUserInfo = Provider.of<UserInfoProvider>(context, listen: false).userInformation;
+    userEmail = currentUserInfo!.personalInfo!.emailAddress!;
+    userName = currentUserInfo!.personalInfo!.firstName!;
+
     return  Scaffold(
       key: sKey,
       drawer: Container(

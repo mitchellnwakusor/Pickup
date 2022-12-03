@@ -24,8 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
       builder: (BuildContext context, snapshot){
         if(snapshot.hasData){
           //  Todo: Insert placeholder
-
-          return const Placeholder();
+          return Container();
         }
         else{
           return context.watch<Providers>().loggedIn ? const LoginScreen() : const SignupScreen();
