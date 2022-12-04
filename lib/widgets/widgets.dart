@@ -734,6 +734,7 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   CustomColorTheme colorTheme = CustomColorTheme();
   FirebaseAuthentication firebaseAuthentication = FirebaseAuthentication();
+  FirebaseRealtimeDatabase database = FirebaseRealtimeDatabase();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController emailAddress = TextEditingController();
   TextEditingController mobileNo = TextEditingController();
@@ -750,6 +751,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
@@ -776,7 +778,7 @@ class _LoginFormState extends State<LoginForm> {
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (String value) => Provider.of<Providers>(context,listen: false).setEmailAddressValue(value),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 TextFormField(autovalidateMode: AutovalidateMode
                     .onUserInteraction,
                   controller: password,
@@ -828,7 +830,7 @@ class _LoginFormState extends State<LoginForm> {
             if(formKey.currentState!.validate()){
               const LoadingWidget().showLoadingWidget(context);
               await firebaseAuthentication.signInEmailPassword(context, emailAddress.text, password.text);
-
+              // await database.fetchUserInfoLogin(context,'/home');
             }
           }, child: const Text('Sign in')),
           const SizedBox(height: 16),

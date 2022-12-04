@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pickup_driver/services/providers.dart';
 import 'package:pickup_driver/widgets/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../maps/models/user_info.dart';
@@ -99,12 +100,12 @@ class FirebaseAuthentication{
 
   Future<void> signInEmailPassword(BuildContext context, String email, String password) async{
     try {
-      Navigator.pop(context);
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      if(auth.currentUser!=null){
+      UserCredential credential = await auth.signInWithEmailAndPassword(email: email, password: password);
+      if(credential.user!=null){
         await database.fetchUserInfoLogin(context,'/home');
       }
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
       showDialog(context: context, builder: (BuildContext context){
         return CustomDialog(titleText: e.code, contentText: e.message.toString());
       });
@@ -171,6 +172,7 @@ class FirebaseRealtimeDatabase{
     }
   }
   Future<void>fetchUserInfoLogin(BuildContext context, String? routeName) async{
+    Navigator.pop(context);
     FirebaseAuthentication authentication = FirebaseAuthentication();
     User? user = authentication.auth.currentUser;
     UserInformation userInformation;
@@ -189,11 +191,12 @@ class FirebaseRealtimeDatabase{
         PaymentInfo paymentInfo = PaymentInfo(cardCvv: paymentInfoMap!['card cvv'],cardEnabled: paymentInfoMap!['card enabled'],cardExpDate: paymentInfoMap!['card expDate'],cardholderName: paymentInfoMap!['cardholder name'],cardNumber: paymentInfoMap!['card number'],);
 
         userInformation = UserInformation(personalInfo: personalInfo,paymentInfo: paymentInfo);
+
         Provider.of<UserInfoProvider>(context,listen: false).updateUserInfoObject(userInformation);
 
         print(Provider.of<UserInfoProvider>(context,listen: false).userInformation?.personalInfo?.firstName);
-
-        if(userInformation.personalInfo!.userType=='driver'){
+        print(userInformation.personalInfo);
+        if(userInformation.personalInfo?.userType=='driver'){
           if(routeName!=null){
             Navigator.pushReplacementNamed(context, routeName);
           }
@@ -206,6 +209,7 @@ class FirebaseRealtimeDatabase{
         }
 
       });
+
     } on FirebaseException catch (e) {
       showDialog(context: context, builder: (BuildContext context){
         return CustomDialog(titleText: e.code, contentText: e.message.toString());

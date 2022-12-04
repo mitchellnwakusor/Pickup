@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pickup_driver/maps/passenger_destination.dart';
 import 'package:pickup_driver/screens/home.dart';
 import 'package:pickup_driver/screens/login.dart';
+import 'package:pickup_driver/screens/placeholder.dart';
 import 'package:pickup_driver/screens/signup.dart';
 import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/services/providers.dart';
@@ -19,17 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: firebaseAuth.auth.authStateChanges(),
-      builder: (BuildContext context, snapshot){
-        if(snapshot.hasData){
-          //  Todo: Insert placeholder
-          return Container();
-        }
-        else{
-          return context.watch<Providers>().loggedIn ? const LoginScreen() : const SignupScreen();
-        }
-      },
-    );
+    return Provider.of<Providers>(context,listen: true).loggedIn ? const LoginScreen() : const SignupScreen();
+
   }
 }

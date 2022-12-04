@@ -26,9 +26,9 @@ class JourneyMan extends StatelessWidget {
   Widget build(BuildContext context){
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (c) => Providers()),
-        ChangeNotifierProvider(create: (c) => UserInfoProvider()),
-        ChangeNotifierProvider(create: (c) => AppInfo()),
+        ChangeNotifierProvider(create: (context) => Providers()),
+        ChangeNotifierProvider(create: (context) => UserInfoProvider()),
+        ChangeNotifierProvider(create: (context) => AppInfo()),
 
       ],
       child: MaterialApp(
