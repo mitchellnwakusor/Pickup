@@ -46,7 +46,7 @@ dependencies:
   flutter_polyline_points: ^1.0.0
   geolocator: ^9.0.2
   http: ^0.13.4
-
+  image_picker: ^0.8.6
   firebase_core: ^1.24.0
   firebase_core_platform_interface: 4.5.1
   webview_flutter:

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../maps/models/user_info.dart';
+import '../map/models/user_info.dart';
 
 class FirebaseAuthentication{
 
@@ -184,7 +184,7 @@ class FirebaseRealtimeDatabase{
     }
   }
   Future<void>fetchUserInfoLogin(BuildContext context, String? routeName) async{
-    Navigator.pop(context);
+    // Navigator.pop(context);
     FirebaseAuthentication authentication = FirebaseAuthentication();
     User? user = authentication.auth.currentUser;
     UserInformation userInformation;
@@ -227,7 +227,6 @@ class FirebaseRealtimeDatabase{
         return CustomDialog(titleText: e.code, contentText: e.message.toString());
       });
     }
-
   }
 
   Future<void> storePersonalInfo(BuildContext context,String firstName, String lastName, String email, String mobileNumber, User user) async{

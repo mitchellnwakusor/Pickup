@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/services/providers.dart';
 import 'package:pickup_driver/widgets/custom_color_theme.dart';
@@ -271,7 +274,6 @@ class _CustomConfirmationDialogState extends State<CustomConfirmationDialog> {
     );
   }
 }
-
 
 class _CustomDialogState extends State<CustomDialog> {
 
@@ -1386,6 +1388,83 @@ class _PaymentCardFormState extends State<PaymentCardForm> {
   }
 }
 
+class ProfilePicturePage extends StatefulWidget {
+  const ProfilePicturePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProfilePicturePage> createState() => _ProfilePicturePageState();
+}
+
+class _ProfilePicturePageState extends State<ProfilePicturePage> {
+  File? image;
+
+  void UseCamera() {
+
+  }
+
+  Future pickImage() async{
+  try{
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    final imageTemp = File(image.path);
+    this.image = imageTemp;
+    setState(() {});
+  }
+  on PlatformException catch (e){
+    showDialog(context: context, builder: (BuildContext context){
+      return CustomDialog(titleText: e.code, contentText: e.message.toString());
+    });
+  }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 16,),
+          if(image!=null) ...[
+            Expanded(flex: 2,child: CircleAvatar(minRadius:80, child: Image.file(image!,scale: 0.4),backgroundColor: Colors.white,)),
+            ]
+          else ...[
+
+          ],
+          // const Expanded(flex: 2, child: CircleAvatar(minRadius:80, backgroundImage: assetImage('lib/assets/icons/blankPicture.png'))),
+               // AssetImage('lib/assets/icons/blankPicture.png'))),
+           // AssetImage('lib/assets/icons/blankPicture.png'))) ,
+            // : Image.asset('lib/assets/icons/blankPicture.png')
+          const SizedBox(height: 32),
+           Expanded(flex: 2,child: Text('Please upload a passport photograph or selfie image with a white background.'
+              ' This image will be used as your profile picture within the app.',style: Theme.of(context).textTheme.subtitle1,)),
+          // const SizedBox(height: 16,),
+          Expanded(
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,0,0),
+                    child: ElevatedButton.icon(onPressed: (){}, icon: Icon(Icons.camera_alt), label: Text('TAKE SELFIE'), style: Theme.of(context).elevatedButtonTheme.style,),
+                  ),
+                  const SizedBox(height: 16,),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,0,0),
+                    child: ElevatedButton.icon(onPressed: (){
+                      pickImage();
+                    }, icon: Icon(Icons.upload_file), label: Text('UPLOAD PICTURE'),style: Theme.of(context).elevatedButtonTheme.style,),
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
 
 
 

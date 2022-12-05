@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:pickup_driver/maps/infoHandler/app_info.dart';
-import 'package:pickup_driver/maps/passenger_destination.dart';
+import 'package:pickup_driver/map/home_index.dart';
 import 'package:pickup_driver/screens/add_payment_card.dart';
+import 'package:pickup_driver/screens/add_profile_picture.dart';
 import 'package:pickup_driver/screens/home.dart';
 import 'package:pickup_driver/screens/login.dart';
 import 'package:pickup_driver/screens/signup.dart';
@@ -12,6 +12,8 @@ import 'package:pickup_driver/screens/verify_otp.dart';
 import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/services/providers.dart';
 import 'package:provider/provider.dart';
+
+import 'map/infoHandler/app_info.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +37,14 @@ class JourneyMan extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
+          // '/' : (context) => const AddProfilePictureScreen(),
+          // '/' : (context) => const HomeIndex(),
           '/' : (context) => const SplashScreen(),
-          '/home' : (context) => const PassengerDestination(),
+          '/home' : (context) => const HomeIndex(),
           '/signup' : (context) => const SignupScreen(),
           '/login' : (context) => const LoginScreen(),
           '/otpverification' : (context) => const VerifyOTP(),
+          '/addProfilePicture' : (context) => const AddProfilePictureScreen(),
           '/addPaymentCard' : (context) => const AddPaymentCardScreen(),
         },
       ),

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pickup_driver/services/firebase_services.dart';
 
 
-final FirebaseAuth fireAuth = FirebaseAuth.instance;
-User? currentFirebaseUser;
+
+User? currentFirebaseUser = FirebaseAuthentication().auth.currentUser;

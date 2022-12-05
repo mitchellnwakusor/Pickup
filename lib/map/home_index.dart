@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:pickup_driver/global/global.dart';
+import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/widgets/custom_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -67,6 +68,8 @@ class _HomeIndexState extends State<HomeIndex> {
     userName = "John Doe";
   }
 
+  FirebaseAuthentication authentication = FirebaseAuthentication();
+
   @override
   void initState()
   {
@@ -91,7 +94,7 @@ class _HomeIndexState extends State<HomeIndex> {
             },
           ),
 
-          //ui for online offline drivers
+          // ui for online offline drivers
           statusText != "Now Online"
               ? Container(
             height: MediaQuery.of(context).size.height,
