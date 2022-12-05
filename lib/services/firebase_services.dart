@@ -112,6 +112,18 @@ class FirebaseAuthentication{
     }
   }
 
+  Future<void> signOut(BuildContext context) async{
+    try {
+      await auth.signOut();
+      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, '/');
+    } on FirebaseException catch (e) {
+      showDialog(context: context, builder: (BuildContext context){
+        return CustomDialog(titleText: e.code, contentText: e.message.toString());
+      });
+    }
+  }
+
 }
 
 class FirebaseRealtimeDatabase{

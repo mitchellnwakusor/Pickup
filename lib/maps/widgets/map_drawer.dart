@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-
+import 'package:pickup_driver/widgets/widgets.dart';
 
 class MapDrawer extends StatefulWidget {
+  String? name;
+  String? email;
 
- String? name;
- String? email;
-
- MapDrawer({this.name,this.email});
+  MapDrawer({this.name, this.email});
 
   @override
   State<MapDrawer> createState() => _MapDrawerState();
 }
 
 class _MapDrawerState extends State<MapDrawer> {
+
   @override
   Widget build(BuildContext context) {
-
     return Drawer(
       child: ListView(
         children: [
@@ -28,55 +27,56 @@ class _MapDrawerState extends State<MapDrawer> {
               decoration: BoxDecoration(
                 color: Colors.blue[800],
               ),
-                child: Row(
-            children: [
-             const Icon(Icons.person,
-              size: 80,
-                  color: Colors.white,
-              ),
-
-             const SizedBox(width: 16),
-
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
                 children: [
-                  Text(
-                    widget.name.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
+                  const Icon(
+                    Icons.person,
+                    size: 80,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
                   ),
-                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.name.toString(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
-                  const SizedBox( height: 10,),
-                  Text(
-                    widget.email.toString(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-
-                    ),
-                  ),
-
+                      // const SizedBox( height: 10,),
+                      // Text(
+                      //   widget.email.toString(),
+                      //   style: const TextStyle(
+                      //     fontSize: 12,
+                      //     color: Colors.white,
+                      //
+                      //   ),
+                      // ),
+                    ],
+                  )
                 ],
-              )
-
-            ],
-                ),
+              ),
             ),
           ),
 
-          const SizedBox(height: 12.0,),
+          const SizedBox(
+            height: 12.0,
+          ),
 
           //drawer body
 
+          //ride history
           GestureDetector(
-            onTap: (){
-
-            },
+            onTap: () {},
             child: const ListTile(
-              leading: Icon(Icons.history, color: Colors.white54,),
+              leading: Icon(
+                Icons.history,
+                color: Colors.white54,
+              ),
               title: Text(
                 "History",
                 style: TextStyle(
@@ -85,13 +85,14 @@ class _MapDrawerState extends State<MapDrawer> {
               ),
             ),
           ),
-
+          //user profile
           GestureDetector(
-            onTap: (){
-
-            },
+            onTap: () {},
             child: const ListTile(
-              leading: Icon(Icons.person, color: Colors.white54,),
+              leading: Icon(
+                Icons.person,
+                color: Colors.white54,
+              ),
               title: Text(
                 "Profile",
                 style: TextStyle(
@@ -100,13 +101,14 @@ class _MapDrawerState extends State<MapDrawer> {
               ),
             ),
           ),
-
+          //about
           GestureDetector(
-            onTap: (){
-
-            },
+            onTap: () {},
             child: const ListTile(
-              leading: Icon(Icons.info, color: Colors.white54,),
+              leading: Icon(
+                Icons.info,
+                color: Colors.white54,
+              ),
               title: Text(
                 "About",
                 style: TextStyle(
@@ -115,14 +117,18 @@ class _MapDrawerState extends State<MapDrawer> {
               ),
             ),
           ),
-
+          //sign out
           GestureDetector(
-            onTap: (){
-
-              Navigator.pushNamed(context, '/splashScreen');
+            onTap: () {
+              showDialog(context: context, builder: (BuildContext context){
+                return const CustomConfirmationDialog(titleText: 'Sign out', contentText: 'Are you sure you want to sign out?');
+              });
             },
             child: const ListTile(
-              leading: Icon(Icons.logout, color: Colors.white54,),
+              leading: Icon(
+                Icons.logout,
+                color: Colors.white54,
+              ),
               title: Text(
                 "Sign Out",
                 style: TextStyle(
@@ -131,10 +137,6 @@ class _MapDrawerState extends State<MapDrawer> {
               ),
             ),
           ),
-
-
-
-
         ],
       ),
     );

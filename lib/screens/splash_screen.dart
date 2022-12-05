@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Provider.of<Providers>(context,listen: true).loggedIn ? const LoginScreen() : const SignupScreen();
+    return Provider.of<Providers>(context,listen: true).loggedIn ? const SignupScreen() : const LoginScreen();
 
   }
 }

@@ -179,7 +179,7 @@ class SignupFormState extends State<SignupForm> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           RichText(text:  TextSpan(text: 'Already have an account? ',
               style: const TextStyle(color: Colors.black),
               children:  [
@@ -235,6 +235,43 @@ class CustomDialog extends StatefulWidget {
   @override
   State<CustomDialog> createState() => _CustomDialogState();
 }
+
+class CustomConfirmationDialog extends StatefulWidget {
+
+
+  final String titleText;
+  final String contentText;
+  const CustomConfirmationDialog({required this.titleText, required this.contentText,Key? key}) : super(key: key);
+
+  @override
+  State<CustomConfirmationDialog> createState() => _CustomConfirmationDialogState();
+}
+
+class _CustomConfirmationDialogState extends State<CustomConfirmationDialog> {
+  FirebaseAuthentication authentication = FirebaseAuthentication();
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AlertDialog(
+        title: Text(widget.titleText),
+        content: SingleChildScrollView(
+          child: Text(widget.contentText),
+        ),
+        actions: [
+          TextButton.icon(onPressed: (){
+            Navigator.pop(context);
+          }, icon: const Icon(Icons.cancel,color: Colors.red), label: Text('Cancel',style: Theme.of(context).textTheme.labelMedium,)),
+          TextButton.icon(onPressed: () async{
+            await authentication.signOut(context);
+          }, icon: const Icon(Icons.logout,), label: Text('Sign out',style: Theme.of(context).textTheme.labelMedium,)),
+
+        ],
+
+      ),
+    );
+  }
+}
+
 
 class _CustomDialogState extends State<CustomDialog> {
 
