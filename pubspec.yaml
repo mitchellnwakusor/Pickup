@@ -52,6 +52,8 @@ dependencies:
   webview_flutter:
   firebase_dynamic_links: ^4.3.1
   flutter_geofire: ^2.0.3
+  fluttertoast: ^8.1.2
+  flutter_rating_stars: ^1.0.3+4
 dev_dependencies:
   flutter_test:
     sdk: flutter

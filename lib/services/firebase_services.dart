@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pickup_driver/services/providers.dart';
 import 'package:pickup_driver/widgets/widgets.dart';
@@ -13,6 +16,54 @@ class FirebaseAuthentication{
 
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseRealtimeDatabase database = FirebaseRealtimeDatabase();
+
+  Future<void> changeNumber(BuildContext context) async {
+    try{
+     await auth.verifyPhoneNumber(
+         forceResendingToken: Provider.of<Providers>(context,listen: false).token,
+         phoneNumber: '+234${Provider.of<Providers>(context,listen: false).mobileNo}',
+         timeout: const Duration(seconds: 30),
+         verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async{
+         },
+         verificationFailed: (FirebaseAuthException e) async{
+           Navigator.pop(context);
+           showDialog(context: context, builder: (BuildContext context){
+             return CustomDialog(titleText: e.code, contentText: e.message.toString());
+           });
+         },
+         codeSent: (String verificationID, int? resendToken) async{
+           Navigator.pop(context);
+           Provider.of<Providers>(context,listen: false).setVerificationValue(verificationID);
+           Provider.of<Providers>(context,listen: false).setTokenValue(resendToken);
+           Navigator.pushNamed(context, '/otpverificationResetNumber');
+         },
+         codeAutoRetrievalTimeout: (String verificationID){}
+     );
+    }
+    on FirebaseAuthException catch(e){
+      Navigator.pop(context);
+      showDialog(context: context, builder: (BuildContext context){
+        return CustomDialog(titleText: e.code, contentText: e.message.toString());
+      });
+    }
+  }
+  Future<void> changeEmail(BuildContext context, String email) async {
+   User user = auth.currentUser!;
+   try{
+     await auth.currentUser!.updateEmail(email);
+
+     await database.database.ref('/dUser/${user?.uid}/Personal Info').update({
+       'email address': email!.trim(),
+     });
+   }
+       on FirebaseAuthException catch(e){
+         Navigator.pop(context);
+         showDialog(context: context, builder: (BuildContext context){
+           return CustomDialog(titleText: e.code, contentText: e.message.toString());
+         });
+       }
+  }
+
   Future<void> requestOTPCode(BuildContext context) async{
    try {
      await auth.verifyPhoneNumber (
@@ -20,12 +71,6 @@ class FirebaseAuthentication{
        phoneNumber: '+234${Provider.of<Providers>(context,listen: false).mobileNo}',
          timeout: const Duration(seconds: 30),
          verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async{
-           // Navigator.pop(context);
-           // await auth.signInWithCredential(phoneAuthCredential);
-           // await auth.currentUser!.updateEmail(Provider.of<Providers>(context,listen: false).emailAddress);
-           // await auth.currentUser!.updatePassword(Provider.of<Providers>(context, listen: false).password);
-           // await auth.currentUser!.reload();
-           // Navigator.pop(context);
          },
          verificationFailed: (FirebaseAuthException e) async{
          Navigator.pop(context);
@@ -50,6 +95,7 @@ class FirebaseAuthentication{
    }
   }
 
+
   Future<bool> linkEmailPasswordCredentials(BuildContext context) async {
     try {
       await auth.currentUser!.updateEmail(Provider.of<Providers>(context,listen: false).emailAddress);
@@ -67,11 +113,12 @@ class FirebaseAuthentication{
 
   Future<bool> verifyMobileNo(String verificationID,String smsCode, BuildContext context) async {
     try {
+
       PhoneAuthCredential authCredential = PhoneAuthProvider.credential(verificationId: verificationID, smsCode: smsCode);
       await auth.signInWithCredential(authCredential);
       await linkEmailPasswordCredentials(context);
       Navigator.pop(context);
-      Navigator.pushReplacementNamed(context, '/addPaymentCard');
+      Navigator.pushReplacementNamed(context, '/addProfilePicture');
       return true;
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
@@ -82,6 +129,27 @@ class FirebaseAuthentication{
     }
 
   }
+  Future<bool> verifyMobileNoReset(String verificationID,String smsCode, BuildContext context, String? mobileNumber) async {
+    try {
+      User? user = auth.currentUser;
+      PhoneAuthCredential authCredential = PhoneAuthProvider.credential(verificationId: verificationID, smsCode: smsCode);
+      await auth.currentUser!.updatePhoneNumber(authCredential);
+      Navigator.pop(context);
+      await database.database.ref('/dUser/${user?.uid}/Personal Info').update({
+        'Personal Info': {'mobile number': mobileNumber!.trim(),
+        }
+      });
+      return true;
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
+      showDialog(context: context, builder: (BuildContext context){
+        return CustomDialog(titleText: e.code, contentText: e.message.toString());
+      });
+      return false;
+    }
+
+  }
+
 
   Future<void> sendResetPasswordLink(BuildContext context, String email) async{
     try {
@@ -115,8 +183,10 @@ class FirebaseAuthentication{
   Future<void> signOut(BuildContext context) async{
     try {
       await auth.signOut();
+      // Navigator.pushReplacementNamed(context,'/');
       Navigator.pop(context);
       Navigator.pushReplacementNamed(context, '/');
+      // Navigator.pushReplacementNamed(context, '/');
     } on FirebaseException catch (e) {
       showDialog(context: context, builder: (BuildContext context){
         return CustomDialog(titleText: e.code, contentText: e.message.toString());
@@ -128,30 +198,45 @@ class FirebaseAuthentication{
 
 class FirebaseRealtimeDatabase{
 
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  FirebaseStorage firebaseStorage = FirebaseStorage.instance;
   FirebaseDatabase database = FirebaseDatabase.instance;
 
   Future<void>fetchUserInfo(BuildContext context,String? routeName) async{
     User? user = FirebaseAuthentication().auth.currentUser;
+    String path = '/dUser/${user!.uid}/profile/';
+    String? userImageURL;
     UserInformation userInformation;
-    print(user?.uid);
+    print(user.uid);
+
+    //
+    String downloadURL = await firebaseStorage.ref(path).getDownloadURL();
+    userImageURL = downloadURL;
+    // print(userImageURL);
     Map? userInfoMap;
     try {
-      database
-          .ref('/dUser/${user!.uid}')
-          .onValue
-          .listen((event) {
+      await database.ref('/dUser/${user.uid}/Personal Info/').update(
+          {
+            'profile': userImageURL
+          }
+      );
+
+       database.ref('/dUser/${user.uid}').onValue.listen((event) {
         // database.ref('/pUser/fP0CE5J4ZOTjBsQwcu0aQAuu1iW2').onValue.listen((event) {
         userInfoMap = Map<String, dynamic>.from(event.snapshot.value as Map);
         print(userInfoMap);
+
         Map? personalInfoMap = userInfoMap!['Personal Info'];
         Map? paymentInfoMap = userInfoMap!['Payment Info'];
-
+        Map? driverInfoMap = userInfoMap!['Driver Info'];
+  // print(personalInfoMap!['profile']);
         // create userInfo object from map
         PersonalInfo personalInfo = PersonalInfo(
             emailAddress: personalInfoMap!['email address'],
             firstName: personalInfoMap!['first name'],
             lastName: personalInfoMap!['last name'],
+            userType: personalInfoMap!['user type'],
+            profileImage: personalInfoMap!['profile'],
             mobileNumber: personalInfoMap!['mobile number']);
         PaymentInfo paymentInfo = PaymentInfo(
           cardCvv: paymentInfoMap!['card cvv'],
@@ -159,10 +244,13 @@ class FirebaseRealtimeDatabase{
           cardExpDate: paymentInfoMap!['card expDate'],
           cardholderName: paymentInfoMap!['cardholder name'],
           cardNumber: paymentInfoMap!['card number'],);
+        DriverInfo driverInfo = DriverInfo(
+          noOfRides: driverInfoMap!['no of rides'],
+          driverRating: driverInfoMap!['driver rating'],
+          );
 
-        userInformation =
-            UserInformation(
-                personalInfo: personalInfo, paymentInfo: paymentInfo);
+        // print(personalInfo.userType);
+        userInformation = UserInformation(personalInfo: personalInfo, paymentInfo: paymentInfo,driverInfo: driverInfo);
         Provider.of<UserInfoProvider>(context, listen: false)
             .updateUserInfoObject(userInformation);
 
@@ -170,7 +258,7 @@ class FirebaseRealtimeDatabase{
             .of<UserInfoProvider>(context, listen: false)
             .userInformation
             ?.personalInfo
-            ?.firstName);
+            ?.profileImage);
 
         if(routeName!=null){
           Navigator.pushReplacementNamed(context, routeName);
@@ -187,22 +275,33 @@ class FirebaseRealtimeDatabase{
     // Navigator.pop(context);
     FirebaseAuthentication authentication = FirebaseAuthentication();
     User? user = authentication.auth.currentUser;
+    String path = '/dUser/${user!.uid}/profile/';
+    String? userImageURL;
     UserInformation userInformation;
-    print(user?.uid);
+    print(user.uid);
+
     Map? userInfoMap;
     try {
+      await database.ref('/dUser/${user.uid}').update(
+          {
+            'profile': userImageURL
+          }
+      );
+
       database.ref('/dUser/${user!.uid}').onValue.listen((event) {
         // database.ref('/pUser/fP0CE5J4ZOTjBsQwcu0aQAuu1iW2').onValue.listen((event) {
         userInfoMap = Map<String,dynamic>.from(event.snapshot.value as Map);
         print(userInfoMap);
         Map? personalInfoMap = userInfoMap!['Personal Info'];
         Map? paymentInfoMap = userInfoMap!['Payment Info'];
+        Map? driverInfoMap = userInfoMap!['Driver Info'];
 
         // create userInfo object from map
-        PersonalInfo personalInfo = PersonalInfo(emailAddress: personalInfoMap!['email address'],firstName: personalInfoMap!['first name'],lastName: personalInfoMap!['last name'],mobileNumber: personalInfoMap!['mobile number'],userType: personalInfoMap!['user type']);
-        PaymentInfo paymentInfo = PaymentInfo(cardCvv: paymentInfoMap!['card cvv'],cardEnabled: paymentInfoMap!['card enabled'],cardExpDate: paymentInfoMap!['card expDate'],cardholderName: paymentInfoMap!['cardholder name'],cardNumber: paymentInfoMap!['card number'],);
+        PersonalInfo personalInfo = PersonalInfo(emailAddress: personalInfoMap!['email address'],firstName: personalInfoMap!['first name'],lastName: personalInfoMap['last name'],mobileNumber: personalInfoMap!['mobile number'],userType: personalInfoMap!['user type']);
+        PaymentInfo paymentInfo = PaymentInfo(cardCvv: paymentInfoMap!['card cvv'],cardEnabled: paymentInfoMap['card enabled'],cardExpDate: paymentInfoMap['card expDate'],cardholderName: paymentInfoMap!['cardholder name'],cardNumber: paymentInfoMap!['card number'],);
+        DriverInfo driverInfo = DriverInfo(noOfRides: driverInfoMap!['no of rides'],driverRating: driverInfoMap['driver rating']);
 
-        userInformation = UserInformation(personalInfo: personalInfo,paymentInfo: paymentInfo);
+        userInformation = UserInformation(personalInfo: personalInfo,paymentInfo: paymentInfo,driverInfo: driverInfo);
 
         Provider.of<UserInfoProvider>(context,listen: false).updateUserInfoObject(userInformation);
 
@@ -272,6 +371,22 @@ class FirebaseRealtimeDatabase{
       });
     }
   }
+  Future<void> storeDriverInfo(BuildContext context,User user) async{
+    try{
+      await database.ref('/dUser/${user?.uid}').update({
+        'Driver Info': {
+          'no of rides': 0,
+          'driver rating': 0.0,
+        }
+      });
+      // Navigator.pop(context);
+    }
+    on FirebaseException catch(e){
+      showDialog(context: context, builder: (BuildContext context) {
+        return CustomDialog(titleText: e.code, contentText: e.message.toString());
+      });
+    }
+  }
   Future<void> skippedPaymentInfo(BuildContext context) async{
     User? user = FirebaseAuthentication().auth.currentUser;
     try{
@@ -297,10 +412,21 @@ class FirebaseRealtimeDatabase{
     }
   }
 
-
-
 }
 
+class FirebaseStorageService{
+
+  Future<void> uploadProfilePicture(File? image,BuildContext context) async{
+    final uid = FirebaseAuthentication().auth.currentUser!.uid;
+    final path = 'dUser/$uid/profile/';
+    UploadTask? uploadTask;
+    final ref = FirebaseStorage.instance.ref().child(path);
+
+    uploadTask = ref.putFile(image!);
+    uploadTask.whenComplete(() => Navigator.pop(context));
+  }
+
+}
 
 
 

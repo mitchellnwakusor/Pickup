@@ -3,6 +3,7 @@
 //     final userInfo = userInfoFromJson(jsonString);
 
 import 'dart:convert';
+import 'dart:io';
 
 UserInformation userInfoFromJson(String str) => UserInformation.fromJson(json.decode(str));
 
@@ -12,19 +13,23 @@ class UserInformation {
   UserInformation({
     this.paymentInfo,
     this.personalInfo,
+    this.driverInfo,
   });
 
   PaymentInfo? paymentInfo;
   PersonalInfo? personalInfo;
+  DriverInfo? driverInfo;
 
   factory UserInformation.fromJson(Map<String, dynamic> json) => UserInformation(
     paymentInfo: PaymentInfo.fromJson(json["Payment Info"]),
     personalInfo: PersonalInfo.fromJson(json["Personal Info"]),
+    driverInfo: DriverInfo.fromJson(json["Driver Info"]),
   );
 
   Map<String, dynamic> toJson() => {
     "Payment Info": paymentInfo?.toJson(),
     "Personal Info": personalInfo?.toJson(),
+    "Driver Info": driverInfo?.toJson(),
   };
 }
 
@@ -66,7 +71,8 @@ class PersonalInfo {
     this.firstName,
     this.lastName,
     this.mobileNumber,
-    this.userType
+    this.userType,
+    this.profileImage
   });
 
   String? emailAddress;
@@ -74,6 +80,7 @@ class PersonalInfo {
   String? lastName;
   String? mobileNumber;
   String? userType;
+  String? profileImage;
 
   factory PersonalInfo.fromJson(Map<String, dynamic> json) => PersonalInfo(
     emailAddress: json["email address"],
@@ -81,6 +88,7 @@ class PersonalInfo {
     lastName: json["last name"],
     mobileNumber: json["mobile number"],
     userType: json["user type"],
+    profileImage: json["profile"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -89,5 +97,25 @@ class PersonalInfo {
     "last name": lastName,
     "mobile number": mobileNumber,
     "user type": userType,
+    "profile": profileImage,
+  };
+}
+class DriverInfo {
+  DriverInfo({
+    this.noOfRides,
+    this.driverRating,
+  });
+
+  int? noOfRides;
+  int? driverRating;
+
+  factory DriverInfo.fromJson(Map<String, dynamic> json) => DriverInfo(
+      noOfRides: json["no of rides"],
+      driverRating: json["driver rating"]
+  );
+
+  Map<String, dynamic> toJson() => {
+    "no of rides": noOfRides,
+    "driver rating": driverRating,
   };
 }

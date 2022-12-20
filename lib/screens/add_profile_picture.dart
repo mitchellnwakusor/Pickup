@@ -17,7 +17,7 @@ class _AddProfilePictureScreenState extends State<AddProfilePictureScreen> {
         title: const Text('Profile picture'),
     elevation: 0,
     ),
-    body: const ProfilePicturePage(),
+    body: ProfilePicturePage(),
     bottomNavigationBar: const Disclaimer(text: 'By proceeding you agree to our ', actionText: 'Terms & Conditions',)
     );
   }

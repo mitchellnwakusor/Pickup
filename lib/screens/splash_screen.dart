@@ -17,23 +17,49 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
+  Future<bool> isPaymentInfoStored(User? user) async{
+    final result = await FirebaseRealtimeDatabase().database.ref('dUser/${user!.uid}/Payment Info/card enabled').get();
+    print(result.value);
+    if(result.value!=null){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(stream: FirebaseAuthentication().auth.authStateChanges(),builder: (BuildContext context,AsyncSnapshot<User?> snapshot){
+    return StreamBuilder(stream: FirebaseAuthentication().auth.authStateChanges(),builder: (BuildContext context,AsyncSnapshot<User?> snapshot)  {
       if(snapshot.hasData){
-        if(Provider.of<UserInfoProvider>(context).userInformation!=null){
-          return const HomeIndex();
-        }
-        return const PlaceHolderPage();
-        //switch with actual splash screen
+        User? tempUser = snapshot.data;
+        return PlaceHolderPage(user: tempUser,);
+        // bool? isStored;
+        // Future<bool> func(User? user) async{
+        //   //sign up complete
+        //   if(await isPaymentInfoStored(user)){
+        //     return true;
+        //   }
+        //   else{
+        //     return false;
+        //   }
+        // }
+        // isStored =  func(tempUser);
+        // print(isStored);
+        //
+        // if(isStored!){
+        //   FirebaseRealtimeDatabase().fetchUserInfo(context, null);
+        //   return const HomeIndex();
+        // }
+        // else{
+        //   return const PlaceHolderPage();
+        // }
       }
       else {
         return Provider.of<Providers>(context,listen: true).loggedIn ? const SignupScreen() : const LoginScreen();
       }
     });
-    return Provider.of<Providers>(context,listen: true).loggedIn ? const SignupScreen() : const LoginScreen();
+    // return Provider.of<Providers>(context,listen: true).loggedIn ? const SignupScreen() : const LoginScreen();
 
   }
 }
