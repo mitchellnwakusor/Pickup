@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pickup_driver/global/global.dart';
+import 'package:pickup_driver/main.dart';
 import 'package:pickup_driver/services/firebase_services.dart';
 import 'package:pickup_driver/widgets/custom_color_theme.dart';
 import 'package:flutter/material.dart';
@@ -110,13 +113,39 @@ class _HomeIndexState extends State<HomeIndex> {
                   : 25,
               left: 0,
               right: 0,
-              bottom: 0,
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                       onPressed: (){
-                        driverIsOnlineNow();
+
+                        if(isDriverActive != true)//Offline
+                        {
+                          driverIsOnlineNow();
+                          upDateDriversLocationAtRealtime();
+
+                          setState(() {
+                            statusText = "Now Online";
+                            isDriverActive = true;
+                          });
+
+                          //display Toast
+                          Fluttertoast.showToast(msg: "You are Online Now");
+                        }
+
+                        else//online
+                        {
+                          driverIsOfflineNow();
+
+                          setState(() {
+                            statusText = "Now Offline";
+                            isDriverActive = false;
+                          });
+
+                          //display Toast
+                          Fluttertoast.showToast(msg: "You are Offline Now");
+                        }
                       },
                     style: ElevatedButton.styleFrom(
                       primary: customColorTheme?.btnColor,
@@ -155,7 +184,7 @@ class _HomeIndexState extends State<HomeIndex> {
     driverCurrentPosition = pos;
 
     //set location of all drivers online using driver id
-    Geofire.initialize("activeDrivers");
+    Geofire.initialize( "activeDrivers");
     Geofire.setLocation(
         currentFirebaseUser!.uid,
         driverCurrentPosition!.latitude,
@@ -169,5 +198,52 @@ class _HomeIndexState extends State<HomeIndex> {
 
     ref.set("idle"); // searching for ride request
     ref.onValue.listen((event) { });
+
+    print( currentFirebaseUser!.displayName);
   }
+
+
+  upDateDriversLocationAtRealtime(){
+
+    streamSubscriptionPosition = Geolocator
+        .getPositionStream()
+        .listen((Position position) {
+          driverCurrentPosition = position;
+
+          if(isDriverActive == true){
+            Geofire.setLocation(
+                currentFirebaseUser!.uid,
+                driverCurrentPosition!.latitude,
+                driverCurrentPosition!.longitude
+            );
+          }
+
+          LatLng latLng = LatLng(
+              driverCurrentPosition!.latitude,
+              driverCurrentPosition!.longitude
+          );
+
+          newGoogleMapController!.animateCamera(CameraUpdate.newLatLng(latLng));
+
+    });
+  }
+  driverIsOfflineNow(){
+    Geofire.removeLocation(currentFirebaseUser!.uid);
+    DatabaseReference? ref = FirebaseDatabase.instance.ref()
+        .child("dUser")
+        .child(currentFirebaseUser!.uid)
+        .child("newRideStatus");
+    ref.onDisconnect();
+    ref.remove();
+    ref = null;
+    
+    Future.delayed(const Duration(milliseconds: 2000), 
+      ()
+        {
+          SystemChannels.platform.invokeListMethod("SystemNavigator.pop");
+
+        }
+    );
+  }
+
 }
