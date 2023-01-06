@@ -166,6 +166,21 @@ class FirebaseAuthentication{
     }
   }
 
+  Future<void> verifyEmail(BuildContext context) async {
+    auth.currentUser!.sendEmailVerification().then((value)
+    {
+      Navigator.pop(context);
+      showDialog(context: context, builder: (BuildContext context) {
+        return CustomDialog(titleText: 'Successful',
+            contentText: 'Verification message sent to ***${auth.currentUser!
+                .email!.substring(3)}');
+      });
+    }
+    );
+
+
+  }
+
   Future<void> signInEmailPassword(BuildContext context, String email, String password) async{
     try {
       UserCredential credential = await auth.signInWithEmailAndPassword(email: email, password: password);
