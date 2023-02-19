@@ -63,7 +63,6 @@ class FirebaseAuthentication{
          });
        }
   }
-
   Future<void> requestOTPCode(BuildContext context) async{
    try {
      await auth.verifyPhoneNumber (
@@ -94,8 +93,6 @@ class FirebaseAuthentication{
 
    }
   }
-
-
   Future<bool> linkEmailPasswordCredentials(BuildContext context) async {
     try {
       await auth.currentUser!.updateEmail(Provider.of<Providers>(context,listen: false).emailAddress);
@@ -110,7 +107,6 @@ class FirebaseAuthentication{
       return false;
     }
   }
-
   Future<bool> verifyMobileNo(String verificationID,String smsCode, BuildContext context) async {
     try {
 
@@ -149,14 +145,13 @@ class FirebaseAuthentication{
     }
 
   }
-
-
   Future<void> sendResetPasswordLink(BuildContext context, String email) async{
     try {
-      Navigator.pop(context);
-      await auth.sendPasswordResetEmail(email: email);
-      showDialog(context: context, builder: (BuildContext context){
-        return CustomDialog(titleText: 'Password reset link sent', contentText: 'A password reset link has been sent to $email');
+      await auth.sendPasswordResetEmail(email: email).then((value) {
+        Navigator.pop(context);
+        showDialog(context: context, builder: (BuildContext context){
+          return CustomDialog(titleText: 'Password reset link sent', contentText: 'A password reset link has been sent to $email');
+        });
       });
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
@@ -165,7 +160,6 @@ class FirebaseAuthentication{
       });
     }
   }
-
   Future<void> verifyEmail(BuildContext context) async {
     auth.currentUser!.sendEmailVerification().then((value)
     {
@@ -180,7 +174,6 @@ class FirebaseAuthentication{
 
 
   }
-
   Future<void> signInEmailPassword(BuildContext context, String email, String password) async{
     try {
       UserCredential credential = await auth.signInWithEmailAndPassword(email: email, password: password);
@@ -194,7 +187,6 @@ class FirebaseAuthentication{
       });
     }
   }
-
   Future<void> signOut(BuildContext context) async{
     try {
       await auth.signOut();

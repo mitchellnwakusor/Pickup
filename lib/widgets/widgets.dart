@@ -512,6 +512,7 @@ class _OTPFormState extends State<OTPForm> {
           ])),
           const SizedBox(height: 16.0),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Flexible(
                 child: Container(
@@ -1878,7 +1879,7 @@ class _SettingsPageState extends State<SettingsPage> {
                    },
                    child: CircleAvatar(
                      minRadius: 80,
-                     backgroundImage:  NetworkImage(widget.user!.personalInfo!.profileImage!, scale: 0.6), //AssetImage('blankPicture.png')
+                     backgroundImage:  NetworkImage(widget.user!.personalInfo!.profileImage!), //AssetImage('blankPicture.png')
                      backgroundColor: Colors.white54,
                    ),
                  ),),
