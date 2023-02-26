@@ -19,7 +19,7 @@ class _PlaceHolderPageState extends State<PlaceHolderPage> {
   Future<bool> checkIfSignUpCompleted(User? user) async{
     bool? temp;
     //network check
-    String path = '/dUser/${user!.uid}/Payment Info/cardholder name';
+    String path = '/dUser/${user!.uid}/Payment Info/card enabled';
     DataSnapshot snapshot = await database.database.ref(path).get();
     print(snapshot.value);
     if(snapshot.value!=null){

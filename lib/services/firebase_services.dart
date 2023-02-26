@@ -403,10 +403,9 @@ class FirebaseRealtimeDatabase{
           'card number': '',
           'card expDate': '',
           'card cvv': '',
-          'card enabled': '',
+          'card enabled': false,
         }
       });
-      Navigator.pop(context);
       Navigator.pop(context);
 
       await fetchUserInfo(context, '/home');
